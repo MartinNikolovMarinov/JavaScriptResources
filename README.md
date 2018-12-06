@@ -26,6 +26,17 @@
     <a href="#js-most-important">Most important thing about functions in JavaScript ! (advanced topic)</a>
   </li>
   <li>
+    <a href="#promises">Promises</a>
+    <ul>
+      <li><a href="#then-catch">Consumers: then and catch</a></li>
+      <li><a href="#promise-chain">Promises chaining</a></li>
+      <li><a href="#returning-promises">Returning promises</a></li>
+      <li><a href="#async-await">Async/await</a></li>
+      <li><a href="#multiple-promises">Multiple Async Promises</a></li>
+      <li><a href="#mixed-execution">Mixed Execution Example</a></li>
+    </ul>
+  </li>
+  <li>
     <a href="#modules">JavaScript Modules</a>
     <ul>
       <li><a href="#revealing-module-pattern">The Revealing Module Pattern</li>
@@ -450,6 +461,337 @@ So what ?
 
 **Using heap memory also means that Closure can be a source of memory leaks, if we hold them unnecessarily, or if we hold in them something we don't need!**
 
+<h1 id="promises">Promises</h1>
+
+Promises are usually vaguely defined as **a proxy for a value that will eventually become available**.
+
+The constructor syntax :
+
+```js
+let promise = new Promise(function(resolve, reject) {
+  // ...
+});
+```
+The function passed to new Promise is called the **executor**. When the promise is created, this executor function runs automatically. It contains the producing code, that should eventually produce a result.
+
+The resulting promise object has internal properties:
+
+* **state** - initially **pending**, then changes to either **fulfilled** or **rejected**,
+* **result** - an arbitrary value of your choosing, initially undefined.
+
+When the executor finishes the job, it should call one of the functions that it gets as arguments:
+
+* **resolve(value)** - to indicate that the job finished successfully:
+  * sets state to **fulfilled**,
+  * sets result to value.
+* **reject(error)** - to indicate that an error occurred:
+  * sets state to **rejected**,
+  * sets result to error.
+
+<img src="./res/promise_state_visual_1.PNG">
+
+Here's an example of a Promise constructor and a simple executor function :
+```js
+let promise = new Promise(function(resolve, reject) {
+  // the function is executed automatically when the promise is constructed
+  // after 1 second signal that the job is done with the result "done!"
+  setTimeout(() => resolve("done!"), 1000);
+});
+```
+
+We can see two things by running the code above:
+
+1. The executor is called automatically and immediately (by the `new Promise`).
+2. The executor receives two arguments: **resolve** and **reject** - these functions are pre-defined by the JavaScript engine. So we don't need to create them. Instead, we should write the executor to call them when ready.
+
+After one second of "processing" the executor calls `resolve("done")` to produce the result :
+
+<img src="./res/promise_state_visual_2.PNG">
+
+That was an example of a successful job completion, a "fulfilled promise".
+And now an example of the executor rejecting the promise with an error:
+```js
+let promise = new Promise(function(resolve, reject) {
+  // after 1 second signal that the job is finished with an error
+  setTimeout(() => reject(new Error("Whoops!")), 1000);
+});
+```
+
+<img src="./res/promise_state_visual_3.PNG">
+
+To summarize, the executor should do a job (something that takes time usually) and then call resolve or reject to change the state of the corresponding Promise object.
+
+The Promise that is either resolved or rejected is called **settled**, as opposed to a **pending** Promise.
+
+### There can be only a single result or an error
+The executor should call only one **resolve** or **reject**. The promise's state change is final.
+
+All further calls of resolve and reject are ignored:
+```js
+let promise = new Promise(function(resolve, reject) {
+  resolve("done");
+
+  reject(new Error("…")); // ignored
+  setTimeout(() => resolve("…")); // ignored
+});
+```
+The idea is that a job done by the executor may have only one result or an error.
+
+Further, **resolve**/**reject** expect only one argument and will ignore additional arguments.
+
+### Reject with Error objects
+In case if something goes wrong, we can call reject with any type of argument (just like resolve). But it is recommended to use Error objects (or objects that inherit from Error). The reasoning for that will soon become apparent.
+
+
+<h2 id="then-catch"> Consumers: then and catch </h2>
+
+A Promise object serves as a link between the executor and the consuming functions, which will receive the result or error. Consuming functions can be registered (subscribed) using the methods `.then` and `.catch`.
+
+```js
+promise.then(
+  function(result) { /* handle a successful result */ },
+  function(error) { /* handle an error */ }
+);
+```
+
+The first argument of `.then` is a function that:
+* runs when the Promise is resolved
+* receives the result.
+
+The second argument of `.then` is a function that:
+* runs when the Promise is rejected
+* receives the error.
+
+If we're interested only in errors, then we can use null as the first argument: `.then(null, errorHandlingFunction)`. Or we can use `.catch(errorHandlingFunction)`, which is exactly the same:
+```
+promise.catch(fn);
+```
+
+<h2 id="promise-chain">Promises chaining</h2>
+
+Then statements can be chaing in the following way :
+```js
+new Promise(function(resolve, reject) {
+  setTimeout(() => resolve(1), 1000);
+}).then(function(result) {
+  console.log(result); // 1
+  return result * 2;
+}).then(function(result) {
+  console.log(result); // 2
+  return result * 2;
+}).then(function(result) {
+  console.log(result); // 4
+  return result * 2;
+});
+```
+
+The idea is that the result is passed through the chain of `.then` handlers.
+
+Here the flow is:
+
+* The initial promise resolves in 1 second,
+* Then the `.then` handler is called.
+* The value that it returns is passed to the next `.then` handler
+* …and so on.
+
+<img src="./res/promise_state_chain.PNG">
+
+Unlike the chaining, technically we can also add many .then to a single promise, like this :
+```js
+let promise = new Promise(function(resolve, reject) {
+  setTimeout(() => resolve(1), 1000);
+});
+
+promise.then(function(result) {
+  console.log(result); // 1
+  return result * 2;
+});
+
+promise.then(function(result) {
+  console.log(result); // 1
+  return result * 2;
+});
+
+promise.then(function(result) {
+  console.log(result); // 1
+  return result * 2;
+});
+```
+…But that's a totally different thing. Here's the picture (compare it with the chaining above):
+
+<img src="./res/promises_state_one_after_another.PNG">
+
+<h1 id="returning-promises">Returning promises</h1>
+
+Normally, a value returned by a `.then` handler is immediately passed to the next handler. But there's an exception.
+
+If the returned value is a promise, then the further execution is suspended until it settles. After that, the result of that promise is given to the next `.then` handler.
+
+**Returning promises allows us to build chains of asynchronous actions.**
+
+For instance:
+```js
+new Promise(function(resolve, reject) {
+  setTimeout(() => resolve(1), 1000);
+}).then(function(result) {
+  console.log(result); // 1
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(result * 2), 1000);
+  });
+}).then(function(result) {
+  console.log(result); // 2
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(result * 2), 1000);
+  });
+}).then(function(result) {
+  console.log(result); // 4
+});
+```
+
+The picture of how the promise returned by `.then`/`catch` changes:
+<img src="./res/all_promise_states.PNG">
+
+<h2 id="async-await">Async/await</h2>
+
+There's a special syntax to work with promises in a more comfortable fashion, called `async/await`. It's surprisingly easy to understand and use.
+
+### async
+
+Let's start with the `async` keyword. It can be placed before a function, like this:
+```js
+async function f() {
+  return 1;
+}
+```
+
+The word `async` before a function means one simple thing: a function always returns a promise. If the code has return non-promise in it, then JavaScript automatically wraps it into a resolved promise with that value.
+
+For instance, the code above returns a resolved promise with the result of 1, let's test it:
+
+```js
+async function f() {
+  return 1;
+}
+// Equals :
+f().then(alert); // 1
+```
+
+…We could explicitly return a promise, that would be the same:
+
+```js
+async function f() {
+  return Promise.resolve(1);
+}
+f().then(alert); // 1
+```
+
+### Await
+The syntax:
+```js
+// works only inside async functions
+let value = await promise;
+```
+
+The keyword `await` makes JavaScript wait until that promise settles and returns its result. Here's an example with a promise that resolves in 1 second:
+```js
+async function f() {
+  let promise = new Promise((resolve, reject) => {
+    setTimeout(() => resolve("done!"), 1000)
+  });
+
+  let result = await promise; // wait till the promise resolves (*)
+  console.log(result); // "done!"
+}
+
+f();
+```
+The function execution pauses at the line (*) and resumes when the promise settles, with result becoming its result. So the code above shows "done!" in one second.
+
+Let's emphasize: `await` literally makes JavaScript wait until the promise settles, and then go on with the result. That doesn't cost any CPU resources, because the engine can do other jobs meanwhile: execute other scripts, handle events etc.
+
+It's just a more elegant syntax of getting the promise result than promise.then, easier to read and write.
+
+<h2 id="multiple-promises">Multiple Async Promises</h2>
+
+If you have an array of promises that depend on each other you do this :
+```js
+const promises = [...] // an array of multiple actions.
+for(let i = 0; i < promises.length; i++) {
+  promises[i].then(handler)
+}
+
+// or the more common and equivalent syntax :
+for(let i = 0; i < promises.length; i++) {
+  const ret = await promises[i]
+  handler(ret);
+}
+```
+
+This is needed in cases, where the async work depends on data from the previous async work. If promise results don't depend on each other, the above should be optimized as :
+
+```js
+const promises = [...]
+let promise = Promise.all(iterable);
+promise.then(handler);
+
+// or
+await Promise.all(iterable);
+handler();
+```
+
+<h2 id="mixed-execution">Mixed Execution Example</h2>
+
+This example prints [0..9] on the console :
+```js
+function wait(n) {
+  const differed = new Promise((resolve) => {
+    setTimeout(() => resolve(), n)
+  })
+  return differed
+}
+
+async function asyncFn() {
+  console.log('7')
+  await wait(1000)
+  console.log('8')
+}
+
+function promiseFn() {
+  console.log('2')
+  const differed = wait(1000).then(() => {
+    console.log('5')
+  })
+  console.log('3')
+  return differed
+}
+
+function main() {
+  console.log('1')
+  const differed = promiseFn().then(() => {
+    console.log('6')
+    asyncFn().then(() => {
+      console.log('9')
+    })
+  })
+
+  return differed
+}
+
+// Exact same example as main but using async/await
+async function mainAsync() {
+  console.log('1')
+  await promiseFn()
+  console.log('6')
+  await asyncFn()
+  console.log('9')
+}
+
+console.log('0')
+main()
+// mainAsync()
+console.log('4')
+```
+
 <h1 id='modules'>JavaScript Modules</h1>
 Different pieces of software are usually developed in isolation until some requirement needs to be satisfied by a previously existing piece of software. At the moment that other piece of software is brought into the project a dependency is created between it and the new piece of code. Since these pieces of software need to work together, it is of importance that no conflicts arise between them. This may sound trivial, but without some sort of encapsulation it is a matter of time before two modules conflict with each other.
 
@@ -795,3 +1137,5 @@ Hot Module Replacement (HMR) exchanges, adds, or removes modules while an applic
 [Closures](https://medium.com/dailyjs/i-never-understood-javascript-closures-9663703368e8)
 
 [Closures in depth video](https://www.youtube.com/watch?v=zRZNb4GDOPI)
+
+[Promise](https://javascript.info/promise-basics)
