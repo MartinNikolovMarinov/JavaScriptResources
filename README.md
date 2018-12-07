@@ -4,6 +4,9 @@
 
 <ul>
   <li>
+    <a href="#event-loop">Concurrency model and Event Loop</a>
+  </li>
+  <li>
     <a href="#strict">What does 'use strict' do?</a>
   </li>
   <li>
@@ -89,6 +92,32 @@
     <a href="#sources">Sources</a>
   </li>
 </ul>
+
+<h1 id="event-loop">Concurrency model and Event Loop</h1>
+
+Javascript has a single threaded runtime, which means it can do one thing at a time. One thread, one call stack, one thing at a time. Which is why JavaScript has a concurrency model based on an **Event Loop**. This model is quite different from models in other languages like C and Java.
+
+Modern JavaScript engines implement and heavily optimize the described semantics :
+
+<img src="./res/event_queue.PNG">
+
+The call stack is a **LIFO** queue (Last In, First Out), where functions create their local scopes and execute code. Any time a function is called it pushes a stack frame on top of the stack. This works for synchronous code, but some times we want to do work that is more time consuming, which will **block** the main thread.
+
+Any JavaScript code that takes too long to return back control to the **Event Loop** will **block** the execution of any JavaScript code in the page, even block the UI thread, and the user can't click around, scroll the page, and so on.
+
+Whenever one of the Web, or Node asynchronous apis are called, the execution gets differed to that api and when the work is done, a message gets added to the **Event Queue**.
+
+Those messages have pre defined callback functions, which also have to execute and create stack frames. The Runtime waits until there is nothing in the Stack and then starts popping off of the **Event Queue** and on top of the Stack.
+
+**Put simply - callbacks start getting executed after all synchronous code has finished work.**
+
+`setTimeout` won't take precisely x milliseconds, but rather at least x milliseconds, because the **Event Queue** might be clogged. This is why we shouldn't have very heavy computational code in callbacks, they get executed on the main thread and can **block** it.
+
+## ES6 Job Queue
+
+ECMAScript 2015 introduced the concept of the **Job Queue**, which is used by Promises (also introduced in ES6/ES2015). It's a way to execute the result of an async function as soon as possible, rather than being put at the end of the call stack.
+
+**Promises that resolve before the current function ends will be executed right after the current function.**
 
 <h1 id="strict">What does 'use strict' do?</h1>
 
@@ -1124,7 +1153,7 @@ Hot Module Replacement (HMR) exchanges, adds, or removes modules while an applic
 
 [The Webpack Documentation](https://webpack.js.org/concepts/)
 
-[The auth0 Blog](https://auth0.com/blog/javascript-module-systems-showdown/)
+[The auth0 Blog, Js Modules](https://auth0.com/blog/javascript-module-systems-showdown/)
 
 [Babel Documentation](https://babeljs.io/docs/en/)
 
