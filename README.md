@@ -83,6 +83,9 @@
     </ul>
   </li>
   <li>
+    <a href="#workers"> Web Workers, Service Workers </a>
+  </li>
+  <li>
     React ...
   </li>
   <li>
@@ -1148,6 +1151,24 @@ Because JavaScript can be written for both server and browser, webpack offers mu
 
 <h3 id="hot-module-replacement"><a href="./hot-module-replacement.md">Hot Module Replacement</a></h3>
 Hot Module Replacement (HMR) exchanges, adds, or removes modules while an application is running, without a full reload.
+
+<h1 id="workers"> Web Workers, Service Workers </h1>
+
+Web Workers makes it possible to run a script operation in a background thread separate from the main execution thread of a web application. The advantage of this is that laborious processing can be performed in a separate thread, allowing the main (usually the UI) thread to run without being blocked/slowed down.
+
+A worker is an object created using a constructor (e.g. Worker()) that runs a named JavaScript file - this file contains the code that will run in the worker thread; workers run in another global context that is different from the current `window`. This context is represented by either a `DedicatedWorkerGlobalScope` object (in the case of dedicated workers - workers that are utilized by a single script), or a `SharedWorkerGlobalScope` (in the case of shared workers - workers that are shared between multiple scripts).
+
+You can run whatever code you like inside the worker thread, with some exceptions. For example, you can't directly manipulate the DOM from inside a worker, or use some default methods and properties of the window object. But you can use a large number of items available under window, including `WebSockets`.
+
+Data is sent between workers and the main thread via a system of messages - both sides send their messages using the `postMessage()` method, and respond to messages via the `onmessage` event handler (the message is contained within the Message event's data property). The data is copied rather than shared.
+
+Workers may in turn spawn new workers, as long as those workers are hosted within the same origin as the parent page.  In addition, workers may use `XMLHttpRequest` for network I/O, with the exception that the `responseXML` and `channel` attributes on `XMLHttpRequest` always return null.
+
+In addition to dedicated workers, there are other types of worker:
+
+* **Shared Workers** are workers that can be utilized by multiple scripts running in different windows, IFrames, etc., as long as they are in the same domain as the worker. They are a little more complex than dedicated workers - scripts must communicate via an active port.
+* **ServiceWorkers** essentially act as proxy servers that sit between web applications, the browser, and the network (when available). They are intended, among other things, to enable the creation of effective offline experiences, intercept network requests and take appropriate action based on whether the network is available, and update assets residing on the server. They will also allow access to push notifications and background sync APIs. Most commonly used for **caching** resources.
+* **Audio Workers** provide the ability for direct scripted audio processing to be done inside a web worker context.
 
 <h1 id="sources">Sources/References</h1>
 
