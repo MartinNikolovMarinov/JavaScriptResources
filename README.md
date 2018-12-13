@@ -78,7 +78,13 @@
         Webpack optimization ...
       </li>
       <li>
-        Examples ... Start Here Next ...
+        <a href="https://github.com/MartinNikolovMarinov/WebpackExamples" target="_blank">Webpack Examples</a>
+      </li>
+      <li>
+        <a href="https://webpack.js.org/configuration" target="_blank">Webpack Full Configuration File</a>
+      </li>
+      <li>
+        <a href="https://webpack.js.org/loaders" target="_blank">Webpack Official Loaders List</a>
       </li>
     </ul>
   </li>
