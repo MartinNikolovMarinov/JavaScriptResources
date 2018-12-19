@@ -59,7 +59,7 @@
     Linting ...
   </li>
   <li>
-    <a href="#what-is-webpack">What is WebPack</a>
+    <a href="#what-is-webpack">What is Webpack?</a>
     <ul>
       <li><a href="#entry">Entry</a></li>
       <li><a href="#output">Output</a></li>
@@ -69,14 +69,7 @@
       <li><a href="#module">Module</a></li>
       <li><a href="#manifest">Manifest</a></li>
       <li><a href="#targets">Targets</a></li>
-      <li>
-        <a href="#hot-module-replacement">
-          Hot Module Replacement
-        </a>
-      </li>
-      <li>
-        Webpack optimization ...
-      </li>
+      <li><a href="#hot-module-replacement">Hot Module Replacement</a></li>
       <li>
         <a href="https://github.com/MartinNikolovMarinov/WebpackExamples" target="_blank">Webpack Examples</a>
       </li>
@@ -90,6 +83,9 @@
   </li>
   <li>
     <a href="#workers"> Web Workers, Service Workers </a>
+  </li>
+  <li>
+    <a href="#load-performance"> Web applications load performance </a>
   </li>
   <li>
     React ...
@@ -1176,6 +1172,28 @@ In addition to dedicated workers, there are other types of worker:
 * **ServiceWorkers** essentially act as proxy servers that sit between web applications, the browser, and the network (when available). They are intended, among other things, to enable the creation of effective offline experiences, intercept network requests and take appropriate action based on whether the network is available, and update assets residing on the server. They will also allow access to push notifications and background sync APIs. Most commonly used for **caching** resources.
 * **Audio Workers** provide the ability for direct scripted audio processing to be done inside a web worker context.
 
+<h1 id="load-performance">Web applications load performance</h1>
+
+Metrics for performance:
+1. **First Meaningful Paint(FMP)**: when main content appears on screen.
+2. **Hero Rendering Times**: when the page important content finished loading.
+3. **Time To Interactive**: when the user can click/tap on the UI and interact with it.
+4. **Input Responsiveness**: how much time it takes for an interface to respond to user actions.
+5. **Perceptual Speed Index**: measures how quickly the page contents are visually populated.
+
+<img src="./res/performance_metrics.PNG">
+
+Passive monitoring tools :
+1. [Google Chromes build in tool LightHouse](https://developers.google.com/web/tools/lighthouse/#devtools)
+2. [WebPageTest](https://www.webpagetest.org/)
+3. [Yahoo's YSlow](http://yslow.org/)
+
+Active monitoring tools :
+1. [SpeedCurve](https://speedcurve.com/)
+2. [NewRelic](https://newrelic.com/)
+
+In depth information - [here](https://www.youtube.com/watch?v=TJxXYlO1gxA&t=697s)
+
 <h1 id="sources">Sources/References</h1>
 
 [The Webpack Documentation](https://webpack.js.org/concepts/)
@@ -1197,3 +1215,5 @@ In addition to dedicated workers, there are other types of worker:
 [Promise](https://javascript.info/promise-basics)
 
 [Hot module replacement](https://medium.com/@rajaraodv/webpack-hot-module-replacement-hmr-e756a726a07)
+
+[Performance tuning of your web application video](https://www.youtube.com/watch?v=TJxXYlO1gxA&t=697s)
