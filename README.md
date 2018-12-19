@@ -1195,3 +1195,5 @@ In addition to dedicated workers, there are other types of worker:
 [Closures in depth video](https://www.youtube.com/watch?v=zRZNb4GDOPI)
 
 [Promise](https://javascript.info/promise-basics)
+
+[Hot module replacement](https://medium.com/@rajaraodv/webpack-hot-module-replacement-hmr-e756a726a07)
