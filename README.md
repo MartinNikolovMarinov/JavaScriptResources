@@ -71,7 +71,10 @@
       <li><a href="#targets">Targets</a></li>
       <li><a href="#hot-module-replacement">Hot Module Replacement</a></li>
       <li>
-        <a href="https://github.com/MartinNikolovMarinov/WebpackExamples" target="_blank">Webpack Examples</a>
+        <a href="https://github.com/MartinNikolovMarinov/WebpackExamples" target="_blank">My Webpack Examples</a>
+      </li>
+      <li>
+        <a href="https://github.com/webpack/webpack/tree/master/examples" target="_blank">Third Party Examples</a>
       </li>
       <li>
         <a href="https://webpack.js.org/configuration" target="_blank">Webpack Full Configuration File</a>
