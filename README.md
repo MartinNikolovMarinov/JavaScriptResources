@@ -91,7 +91,15 @@
     <a href="#load-performance"> Web applications load performance </a>
   </li>
   <li>
-    React ...
+    <a href="#react">React</a>
+    <ul>
+      <li>
+        <a href="https://reactjs.org/docs/getting-started.html"> The React documentation for the basic concepts </a>
+      </li>
+      <li>
+        <a href="#react-code-split"> Code Splitting </a>
+      </li>
+    </ul>
   </li>
   <li>
     State Management ..
@@ -1197,6 +1205,63 @@ Active monitoring tools :
 
 In depth information - [here](https://www.youtube.com/watch?v=TJxXYlO1gxA&t=697s)
 
+<h1 id="react">React</h1>
+
+<h2 id="react-code-split">Code Splitting</h2>
+
+Code-splitting your app can help you **lazy-load** just the things that are currently needed by the user, which can dramatically improve the performance of your app.
+
+### import()
+
+**When webpack comes across this syntax, it automatically starts code-splitting your app** :
+```js
+import("./math").then(math => {
+  console.log(math.add(16, 26));
+});
+```
+
+The `React.lazy` function lets you render a dynamic import as a regular component and `React.Suspense` allows you to display a component while loading.
+
+Before:
+```js
+import OtherComponent from './OtherComponent';
+
+function MyComponent() {
+  return (
+    <div>
+      <OtherComponent />
+    </div>
+  );
+}
+```
+After:
+```js
+const OtherComponent = React.lazy(() => import('./OtherComponent'));
+
+function MyComponent() {
+  return (
+    <div>
+      <Suspense fallback={<div>Loading...</div>}>
+        <OtherComponent />
+      </Suspense>
+    </div>
+  );
+}
+```
+`React.lazy` currently only supports default exports. If the module you want to import uses named exports, you can create an intermediate module that reexports it as the default. This ensures that treeshaking keeps working and that you don't pull in unused components.
+```js
+// ManyComponents.js
+export const MyComponent = /* ... */;
+export const MyUnusedComponent = /* ... */;
+
+// MyComponent.js
+export { MyComponent as default } from "./ManyComponents.js";
+
+// MyApp.js
+import React, { lazy } from 'react';
+const MyComponent = lazy(() => import("./MyComponent.js"));
+```
+
 <h1 id="sources">Sources/References</h1>
 
 [The Webpack Documentation](https://webpack.js.org/concepts/)
@@ -1220,3 +1285,5 @@ In depth information - [here](https://www.youtube.com/watch?v=TJxXYlO1gxA&t=697s
 [Hot module replacement](https://medium.com/@rajaraodv/webpack-hot-module-replacement-hmr-e756a726a07)
 
 [Performance tuning of your web application video](https://www.youtube.com/watch?v=TJxXYlO1gxA&t=697s)
+
+[React documentation](https://reactjs.org/docs/getting-started.html)
