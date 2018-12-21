@@ -4,7 +4,10 @@
 
 <ul>
   <li>
-    <a href="#event-loop">Concurrency model and Event Loop</a>
+    <a href="#event-loop">Concurrency model and Event Loop.</a>
+  </li>
+  <li>
+    <a href="#js-versions">JavaScript/ECMAScript Versions</a>
   </li>
   <li>
     <a href="#strict">What does 'use strict' do?</a>
@@ -56,7 +59,9 @@
     </a>
   </li>
   <li>
-    Linting ...
+    <a href="https://github.com/MartinNikolovMarinov/WebpackExamples/tree/master/06.app-example-with-typescript">
+      Linting Setup and Rules for TypeScript and React
+    </a>
   </li>
   <li>
     <a href="#what-is-webpack">What is Webpack?</a>
@@ -102,7 +107,10 @@
     </ul>
   </li>
   <li>
-    State Management ..
+    <a href="#state">State Management</a>
+    <ul>
+      <li><a href="#mobx">Mobx State Management</a></li>
+    </ul>
   </li>
   <li>
     <a href="#sources">Sources</a>
@@ -111,15 +119,15 @@
 
 <h1 id="event-loop">Concurrency model and Event Loop</h1>
 
-Javascript has a single threaded runtime, which means it can do one thing at a time. One thread, one call stack, one thing at a time. Which is why JavaScript has a concurrency model based on an **Event Loop**. This model is quite different from models in other languages like C and Java.
+Javascript has a single threaded runtime, which means it can do one thing at a time. **One thread, one call stack, one thing at a time**. Which is why JavaScript has a concurrency model based on an **Event Loop**, for code that requires multi-threaded execution. This model is quite different from models in other languages.
 
 Modern JavaScript engines implement and heavily optimize the described semantics :
 
-<img src="./res/event_queue.PNG">
+<img src="./res/event_queue.PNG"/>
 
 The call stack is a **LIFO** queue (Last In, First Out), where functions create their local scopes and execute code. Any time a function is called it pushes a stack frame on top of the stack. This works for synchronous code, but some times we want to do work that is more time consuming, which will **block** the main thread.
 
-Any JavaScript code that takes too long to return back control to the **Event Loop** will **block** the execution of any JavaScript code in the page, even block the UI thread, and the user can't click around, scroll the page, and so on.
+Any JavaScript code that takes too long to return back control to the **Event Loop** will **block** the execution of other JavaScript code in the page, even block the UI thread, so the user can't click around, scroll the page, and so on.
 
 Whenever one of the Web, or Node asynchronous apis are called, the execution gets differed to that api and when the work is done, a message gets added to the **Event Queue**.
 
@@ -134,6 +142,23 @@ Those messages have pre defined callback functions, which also have to execute a
 ECMAScript 2015 introduced the concept of the **Job Queue**, which is used by Promises (also introduced in ES6/ES2015). It's a way to execute the result of an async function as soon as possible, rather than being put at the end of the call stack.
 
 **Promises that resolve before the current function ends will be executed right after the current function.**
+
+<h1 id="js-versions">
+  JavaScript/ECMAScript Versions
+</h1>
+
+| Version                    | Description                                                                                 |
+|----------------------------|---------------------------------------------------------------------------------------------|
+| ECMAScript 1 (1997)        | First Edition                                                                               |
+| ECMAScript 2 (1998)        | Editorial changes only                                                                      |
+| ECMAScript 3 (1999)        | Added Regular Expressions. Added try/catch.                                                 |
+| ECMAScript 4               | Never Released                                                                              |
+| ECMAScript 5 (2009) aka es5| [List of new features](https://www.w3schools.com/Js/js_es5.asp)                             |
+| ECMAScript 5.1 (2011)      | Editorial changes                                                                           |
+| ECMAScript 2015 aka es6    | [List of new features](https://www.w3schools.com/Js/js_es6.asp)                             |
+| ECMAScript 2016            | Added exponential operator (**), Array.prototype.includes                                   |
+| ECMAScript 2017            | Added string padding, new Object properties, Async functions, Shared Memory                 |
+| ECMAScript 2018            | Added rest/spread properties, Asynchronous iteration, Promise.finally(), Additions to RegExp|
 
 <h1 id="strict">What does 'use strict' do?</h1>
 
@@ -1262,6 +1287,142 @@ import React, { lazy } from 'react';
 const MyComponent = lazy(() => import("./MyComponent.js"));
 ```
 
+<h1 id="state">State Management</h1>
+
+A state in this context is the data layer of your application. When it comes to React and the libraries that help it manage state, you can say that state is an object that contains the data that your application is dealing with. State influences how React components behave and how they are rendered.
+
+<h2 id="mobx">Mobx State Management</h2>
+
+### Observable State on MobX
+Observable state is one of the main concepts of MobX. The idea behind this concept is to make an object able to emit new changes on them to the observers. You can achieve this with the `@observable` decorator :
+```js
+@observable counter = 0
+
+// or without decorators :
+decorate(ClassName, {
+  counter: observable
+})
+```
+Observable values can be JS primitives, references, plain objects, class instances, arrays and maps. The following conversion rules are applied, but can be fine-tuned by using modifiers. See below.
+
+1. If value is an ES6 Map: a new `Observable Map` will be returned.
+2. If value is an array, a new Observable Array will be returned.
+3. If value is an object without prototype, all its current properties will be made observable.
+4. If value is an object with a prototype, a JavaScript primitive or function, observable will throw. Use Boxed Observable observables instead if you want to create a stand-alone observable reference to such a value. MobX will not make objects with a prototype automatically observable; as that is considered the responsibility of its `constructor` function. Use `extendObservable` in the `constructor`, or `@observable` / decorate in its class definition instead.
+
+### Computed Values on MobX
+
+These values are represented by the `@computed` decorator. Computed values work in hand with observable states. With computed values, you can automatically derive values.
+If you have decorators enabled you can use the @computed decorator on any getter of a class property to declaratively create computed properties :
+```js
+class OrderLine {
+    @observable price = 0;
+    @observable amount = 1;
+
+    constructor(price) {
+        this.price = price;
+    }
+
+    @computed get total() {
+        return this.price * this.amount;
+    }
+}
+```
+
+**The computed function `total` is only calculated when price, or amount have changed.**
+
+### Reactions on MobX
+
+Reactions are very similar to computed values. The difference here is that, instead of computing and returning a value, a reaction simply triggers a side effect, more like it performs a side operation. Reactions occur as a result of changes on observables. Reactions could affect the UI, or they could be background actions. MobX provides three main types of reaction functions: `when`, `autorun`, and `reaction`.
+
+The `when` reaction accepts two functions as parameters, the `predicate` and the `effect`. This reaction runs and observes the first function (the predicate) and, when this one is met, it runs the effect function :
+```js
+when(
+  () => this.isEnabled, // predicate
+  () => this.exit() // effect
+);
+```
+The function that returns `isEnabled` must be a function that reacts. That is, `isEnabled` must be marked with `@computed` so that the value is automatically computed or, better yet, marked with an `@observable` decorator.
+
+The next reaction function is the `autorun` function. This function takes in one function and keeps running it until it is manually disposed. Here you can see how you can use an `autorun` function:
+```js
+@observable age = 10
+const dispose = autorun(() => {
+  console.log("My age is: ", age.get())
+})
+dispose()
+```
+With this in place, anytime the variable age changes, the anonymous function passed to autorun logs it out. This function is disposed once you call dispose.
+
+The next one, the `reaction` function, mandatorily accepts two functions: the data function and side effect function. This function is similar to the autorun function but gives you more control on which observables to track. Here, the data function is tracked and returns data to be used inside effect function. Whereas an autorun function reacts to everything used in its function, the reaction function reacts to observables you specify :
+```js
+const todos = observable([
+  {
+    title: "Read Auth0 Blog",
+    done: false,
+  },
+  {
+    title: "Write MobX article",
+    done: true
+  }
+]);
+
+const reactionSample = reaction(
+  () => todos.map(todo => todo.title),
+  titles => console.log("Reaction: ", titles.join(", "))
+);
+```
+**In this case, the reaction function reacts to changes in the length and title of the list.**
+
+Another reaction function available for React developers is the `observer` function. This one is not provided by the main MobX package but, instead, provided by the `mobx-react` library. To use the observer function, you can simply add the `@observer` decorator in front of it like so:
+```js
+@observer class ClassName {
+  // ...
+}
+```
+**With this reaction function, if an object tagged with the @observable decorator is used in the render method of the component and that property changes, the component is automatically re-rendered. The observer function uses autorun internally.**
+
+### Actions on MobX
+Actions are anything that modifies the state. You can mark your actions using the `@action` decorator. As such, you are supposed to use the `@action` on any function that modifies observables or has side effects. A simple example is this:
+```js
+@observable variable = 0;
+
+@action setVariable(newVariable){
+  this.variable = newVariable;
+}
+```
+This function is updating the value of an `observable`, and so it is marked with `@action`.
+
+### Store
+
+The main responsibility of stores is to move logic and state out of your components into a standalone testable unit that can be used in both frontend and backend JavaScript.
+
+Using Mobx for creating a store :
+```js
+import { News } from '@models/News';
+import { NewsService } from '@services/NewsService';
+
+export class NewsStore {
+  public results: News[];
+  private service: NewsService;
+
+  constructor(public sandbox: jc.Sandbox) {
+    this.service = sandbox.getService('news');
+    this.results = this.service.getAllNews();
+  }
+
+  public searchNews(term: string) {
+    const results = this.service.searchNews(term);
+    return results;
+  }
+
+  public getNewsById(id: string) {
+    const newsById = this.service.getNewsById(id);
+    return newsById;
+  }
+}
+```
+
 <h1 id="sources">Sources/References</h1>
 
 [The Webpack Documentation](https://webpack.js.org/concepts/)
@@ -1287,3 +1448,5 @@ const MyComponent = lazy(() => import("./MyComponent.js"));
 [Performance tuning of your web application video](https://www.youtube.com/watch?v=TJxXYlO1gxA&t=697s)
 
 [React documentation](https://reactjs.org/docs/getting-started.html)
+
+[Mobx and React state management](https://auth0.com/blog/managing-the-state-of-react-apps-with-mobx/)
