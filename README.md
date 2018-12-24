@@ -54,9 +54,7 @@
     </ul>
   </li>
   <li>
-    <a href="#babel">
-      What is Babel?
-    </a>
+    <a href="#babel">What is Babel?</a>
   </li>
   <li>
     <a href="https://github.com/MartinNikolovMarinov/WebpackExamples/tree/master/06.app-example-with-typescript">
