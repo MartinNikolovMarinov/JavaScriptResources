@@ -113,6 +113,9 @@
     </ul>
   </li>
   <li>
+    <a href="#testing">Testing</a>
+  </li>
+  <li>
     <a href="#sources">Sources</a>
   </li>
 </ul>
@@ -1423,6 +1426,62 @@ export class NewsStore {
 }
 ```
 
+<h1 id="testing">Testing</h1>
+
+## Terms
+### Stub
+A stub is an object that fakes the actual behavior of an external dependency, that our currently tested class has.
+Stubs have predetermined behavior, often might have hardcoded values for responses.
+
+### Mock
+Mocks are very similar, but are more complicated, might get reused between tests and generally might generate
+dynamic results.
+
+## Types Of Testing
+### Unit test
+Test for a single unit of code, like a class. Complex dependencies and interactions to the outside world are stubbed
+or mocked. If any part of the application changes, only unit tests directly related to that part should fail.
+
+**If you test a single class in a single file, that means that only changes to THIS file/class should affect the test !**
+
+If the above is done correctly, unit tests throw errors for well defined issues in functionality !
+
+### Integration test
+Test the correct inter-operation of multiple subsystems.
+These have a much wider spectrum, could be event communication between different modules/classes of the application,
+could send actual HTTP requests to check BE to FE integration, etc.
+
+Errors are harder to pin down, but at least if an integration test fails you know that there is an issue to search for.
+
+### Smoke test (aka Sanity check)
+A simple integration test that checks if the system blows up on startup.
+
+### Regression test
+The most important type of test! A test that was written when a bug was fixed. It ensures that this specific bug will
+not occur again.
+
+### End to End test
+This type of testing is very different for different applications. For web applications this is also called a
+**Browser test**, because you would use an actual test browser.
+
+**e2e** tests test the entire application, often this is done with external tools, that don't even know about
+the application they are testing. These tools automatically click through menus and verify what is on screen
+ (what the DOM strucutre is), and or what is the state of the different storages (like localStorage on browsers), etc.
+
+When and **e2e** test fails, it is quite hard to know exactly where, because the whole system is running at once.
+
+**These tools are hard to setup and use correctly, and also tests are hard to maintain, so writing too
+many creates problems !**
+
+## How much time should you spend writing different types of tests ?
+
+As a good first guess, Google often suggests a 70/20/10 split: 70% unit tests, 20% integration tests,
+and 10% end-to-end tests.
+
+Visually :
+
+<img src="./res/testing_pyramid.png" />
+
 <h1 id="sources">Sources/References</h1>
 
 [The Webpack Documentation](https://webpack.js.org/concepts/)
@@ -1450,3 +1509,5 @@ export class NewsStore {
 [React documentation](https://reactjs.org/docs/getting-started.html)
 
 [Mobx and React state management](https://auth0.com/blog/managing-the-state-of-react-apps-with-mobx/)
+
+[Testing Applications](https://codeahoy.com/2016/07/05/unit-integration-and-end-to-end-tests-finding-the-right-balance/)
