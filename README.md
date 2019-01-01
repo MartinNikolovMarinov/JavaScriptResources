@@ -7,7 +7,7 @@
     <a href="#event-loop">Concurrency model and Event Loop.</a>
   </li>
   <li>
-    <a href="#js-versions">JavaScript/ECMAScript Versions</a>
+    <a href="#js-versions">JavaScript/ECMAScript Versions.</a>
   </li>
   <li>
     <a href="#strict">What does 'use strict' do?</a>
@@ -142,7 +142,7 @@ Those messages have pre defined callback functions, which also have to execute a
 
 ## ES6 Job Queue
 
-ECMAScript 2015 introduced the concept of the **Job Queue**, which is used by Promises (also introduced in ES6/ES2015). It's a way to execute the result of an async function as soon as possible, rather than being put at the end of the call stack.
+ECMAScript 2015 introduced the concept of the **Job Queue**, which is used by Promises (also introduced in ES6/ES2015). It's a way to execute the result of an async function as soon as possible, rather than being put at the end of the **Event Queue**.
 
 **Promises that resolve before the current function ends will be executed right after the current function.**
 
@@ -154,7 +154,7 @@ ECMAScript 2015 introduced the concept of the **Job Queue**, which is used by Pr
 |----------------------------|---------------------------------------------------------------------------------------------|
 | ECMAScript 1 (1997)        | First Edition                                                                               |
 | ECMAScript 2 (1998)        | Editorial changes only                                                                      |
-| ECMAScript 3 (1999)        | Added Regular Expressions. Added try/catch.                                                 |
+| ECMAScript 3 (1999)        | Added Regular Expressions and try/catch.                                                    |
 | ECMAScript 4               | Never Released                                                                              |
 | ECMAScript 5 (2009) aka es5| [List of new features](https://www.w3schools.com/Js/js_es5.asp)                             |
 | ECMAScript 5.1 (2011)      | Editorial changes                                                                           |
@@ -1511,3 +1511,21 @@ Visually :
 [Mobx and React state management](https://auth0.com/blog/managing-the-state-of-react-apps-with-mobx/)
 
 [Testing Applications](https://codeahoy.com/2016/07/05/unit-integration-and-end-to-end-tests-finding-the-right-balance/)
+
+<!-- Go To Top Button -->
+<a href="#" class="scrollup" style="width: 40px;
+    height:             40px;
+    position:           fixed;
+    bottom:             50px;
+    right:              100px;
+    padding:            10px;
+    border:             2px solid black;
+    border-radius:      30px;
+    background:         white;
+    text-decoration:    none;
+    text-align:         center;
+    font-family:        Consolas;
+    font-weight:        bold;
+    box-sizing:         content-box;
+    z-index:            100;
+    color:              black;">Top<br/>^</a>
