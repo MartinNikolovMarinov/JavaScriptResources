@@ -4,10 +4,10 @@
 
 <ul>
   <li>
-    <a href="#event-loop">Concurrency model and Event Loop.</a>
+    <a href="#event-loop">Concurrency model and Event Loop</a>
   </li>
   <li>
-    <a href="#js-versions">JavaScript/ECMAScript Versions.</a>
+    <a href="#js-versions">JavaScript/ECMAScript Versions</a>
   </li>
   <li>
     <a href="#strict">What does 'use strict' do?</a>
@@ -171,9 +171,6 @@ Strict Mode is a feature in ECMAScript 5 that allows you to place a program, or 
 * It disables features that are confusing or poorly thought out.
 
 ## How do you enable strict mode?
-
-Simple. Toss this at the top of a program to enable it for the whole script:
-
 ```js
 // First way is to use it globally.
 'use strict';
@@ -184,7 +181,7 @@ function imStrict() {
 }
 
 (function() {
-  // You can also define your library strictly.
+  // Defining it strictly for a module :
   'use strict';
 })();
 ```
@@ -276,7 +273,7 @@ Finally, a long-standing (and very annoying) bug has been resolved. Cases where 
 
 By default **this** refers to the global object. That could be either window, if the code is running in the **Browser**, or it could be **global** if the code is running in **NodeJS**. If **use strict** is used then **this**, used outside of an object, will always refer to **undefined**.
 
-The following code is written it the global context, ie. no modules, no IIFE, no object/classes, etc. just plain procedural code :
+The following code is written it the global context, ie. no modules, no IIFE, no object/classes, etc. Just plain procedural code :
 ```js
 function fn() {
   const context = this;
@@ -313,7 +310,7 @@ car.info2 = function() {
 
 /*
   When using arrow funcitons, the scope is inherited from the parent.
-  In this case the window, so in this case - this.maker is undefined.
+  In this case the window, so this.maker is undefined.
 */
 car.info3 = () => {
   'use strict' // using strict doesn't prevent this === window !!
@@ -478,8 +475,8 @@ Before a function gets executed, its body gets parsed/scanned for variable and f
 so the following :
 ```js
 var a = 5;
-test(); // this is not an error !
-new A(a).printA(); // this just appears to work, it actually prints undefined!
+test(); // this is not an error!
+new A(a).printA(); // this just appears to work but it actually prints undefined!
 
 function test () { console.log(a); }
 function A(a) {
@@ -493,12 +490,13 @@ function A(a) {
 becomes :
 ```js
 var test = { /* a reference to the test function object */ }
-var A = { /* nothing is defined here */ }
+var A = { /* object with all undefined properties; has defined functions. */ }
 var a = undefined;
 
 a = 5;
-test(); // prints 5
-new A(a).printA(); // prints undefined !
+test();       // prints 5
+new A(a)      // constructor call initializes all properties !
+  .printA();  // prints undefined !
 ```
 
 <h1 id="clojure">What is a Clojure</h1>
