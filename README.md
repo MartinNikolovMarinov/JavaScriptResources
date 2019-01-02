@@ -516,6 +516,30 @@ When does the function end? When it encounters a `return` statement or it encoun
 * <a href="./ret-function-scope.md">A Function That Returns A Function</a>
 * <a href="./clojure.md">Clojure</a>
 
+## Clojure Scope Chain
+
+```js
+  function C() {
+    // has access to variable a, b
+    let c = 3;
+  }
+
+  function B() {
+    // has access to variable a
+    let b = 2;
+    c();
+  }
+
+  function A() {
+    // has access to variable a, b
+    let a = 1;
+    b();
+  }
+
+  A();
+```
+<img src="./res/clojure_scope_chain.png" />
+
 <h1 id="js-most-important"> Most important thing about functions in JavaScript ! (advanced topic) </h1>
 
 **Is that they are objects on the heap. They have a virtual stack on the heap. JavaScript doesn't easily take advantage of the low-level processor stack at all. Only way is through interpreter optimizations.**
@@ -528,7 +552,31 @@ Why ?
 
 So what ?
 
-**Using heap memory also means that Closure can be a source of memory leaks, if we hold them unnecessarily, or if we hold in them something we don't need!**
+**Using heap memory also means that a Closure can be a source of memory leaks, if we hold them unnecessarily, or if we hold in them something we don't need!**
+
+### We must clear big objects that aren't used in the future
+```js
+(function() {
+  const bigData = [...]
+  const smallResult = []
+
+  function manipulateBigDate() {
+    smallResult = work(bigData);
+  }
+
+  manipulateBigDate();
+
+  bigData = null // !! If we forget this line bigDate will remain in memory as a leak !!
+
+  function getResult() {
+    return smallResult;
+  }
+
+  return {
+    getResult
+  }
+})()
+```
 
 <h1 id="promises">Promises</h1>
 
@@ -609,7 +657,7 @@ The idea is that a job done by the executor may have only one result or an error
 Further, **resolve**/**reject** expect only one argument and will ignore additional arguments.
 
 ### Reject with Error objects
-In case if something goes wrong, we can call reject with any type of argument (just like resolve). But it is recommended to use Error objects (or objects that inherit from Error). The reasoning for that will soon become apparent.
+In case if something goes wrong, we can call reject with any type of argument (just like resolve). But it is recommended to use Error objects (or objects that inherit from Error).
 
 
 <h2 id="then-catch"> Consumers: then and catch </h2>
@@ -665,7 +713,7 @@ Here the flow is:
 
 <img src="./res/promise_state_chain.PNG">
 
-Unlike the chaining, technically we can also add many .then to a single promise, like this :
+Unlike chaining, technically we can also add many `.then` to a single promise, like this :
 ```js
 let promise = new Promise(function(resolve, reject) {
   setTimeout(() => resolve(1), 1000);
@@ -686,7 +734,7 @@ promise.then(function(result) {
   return result * 2;
 });
 ```
-…But that's a totally different thing. Here's the picture (compare it with the chaining above):
+**…But that's a totally different thing. Here's the picture (compare it with the chaining above)**:
 
 <img src="./res/promises_state_one_after_another.PNG">
 
@@ -722,7 +770,7 @@ The picture of how the promise returned by `.then`/`catch` changes:
 
 <h2 id="async-await">Async/await</h2>
 
-There's a special syntax to work with promises in a more comfortable fashion, called `async/await`. It's surprisingly easy to understand and use.
+There's a special syntax to work with promises in a more comfortable fashion, called `async/await`. Using it solves the <a href="http://callbackhell.com/">"callback hell"</a> problem.
 
 ### async
 
@@ -733,7 +781,7 @@ async function f() {
 }
 ```
 
-The word `async` before a function means one simple thing: a function always returns a promise. If the code has return non-promise in it, then JavaScript automatically wraps it into a resolved promise with that value.
+The word `async` before a function means one simple thing: a function always returns a promise. If a non-promise has been returned JavaScript automatically wraps it into a `Promise.resolved(value)`.
 
 For instance, the code above returns a resolved promise with the result of 1, let's test it:
 
@@ -774,11 +822,9 @@ async function f() {
 
 f();
 ```
-The function execution pauses at the line (*) and resumes when the promise settles, with result becoming its result. So the code above shows "done!" in one second.
+The function execution pauses at the line (*) and resumes when the promise settles, with result becoming its result. So the code above prints "done!" in one second.
 
-Let's emphasize: `await` literally makes JavaScript wait until the promise settles, and then go on with the result. That doesn't cost any CPU resources, because the engine can do other jobs meanwhile: execute other scripts, handle events etc.
-
-It's just a more elegant syntax of getting the promise result than promise.then, easier to read and write.
+**Let's emphasize: `await` literally makes JavaScript wait until the promise settles, and then go on with the result. That doesn't cost any CPU resources, because the engine can do other jobs meanwhile: execute other scripts, handle events etc.**
 
 <h2 id="multiple-promises">Multiple Async Promises</h2>
 
@@ -800,11 +846,11 @@ This is needed in cases, where the async work depends on data from the previous 
 
 ```js
 const promises = [...]
-let promise = Promise.all(iterable);
+let promise = Promise.all(promises);
 promise.then(handler);
 
 // or
-await Promise.all(iterable);
+await Promise.all(promises);
 handler();
 ```
 
