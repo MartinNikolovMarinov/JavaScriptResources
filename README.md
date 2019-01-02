@@ -908,7 +908,7 @@ console.log('4')
 ```
 
 <h1 id='modules'>JavaScript Modules</h1>
-Different pieces of software are usually developed in isolation until some requirement needs to be satisfied by a previously existing piece of software. At the moment that other piece of software is brought into the project a dependency is created between it and the new piece of code. Since these pieces of software need to work together, it is of importance that no conflicts arise between them. This may sound trivial, but without some sort of encapsulation it is a matter of time before two modules conflict with each other.
+Different pieces of software are usually developed in isolation until some requirement needs to be satisfied by a previously existing piece of software. Since these pieces of software need to work together, it is of importance that no conflicts arise between them. This may sound trivial, but without some sort of encapsulation it is a matter of time before two modules conflict with each other.
 
 In the following example scripts are manually loaded in the correct order:
 ```html
@@ -939,8 +939,9 @@ JavaScript module systems attempt to deal with these problems and others. They w
 
 ## Solutions :
 <h3 id="revealing-module-pattern">Revealing Module Pattern</h3>
-Most module systems are relatively recent. Before they were available, a particular programming pattern started getting used in more and more JavaScript code: the revealing module pattern.
+Most module systems are relatively recent. Before they were available, a particular programming pattern started getting used in more and more JavaScript code. The Revealing Module Pattern.
 
+Here is one variant of the pattern :
 ```js
 var myRevealingModule = (function () {
     var privateVar = "Ben Cherry",
@@ -1442,23 +1443,37 @@ This function is updating the value of an `observable`, and so it is marked with
 
 The main responsibility of stores is to move logic and state out of your components into a standalone testable unit that can be used in both frontend and backend JavaScript.
 
-Using Mobx for creating a store :
+Using Mobx for creating a store, typescript example :
 ```js
 import { News } from '@models/News';
 import { NewsService } from '@services/NewsService';
+import { observable, action, computed } from 'mobx';
 
 export class NewsStore {
-  public results: News[];
+  @observable public inbox: News[];
+  @observable public isOpen: boolean;
   private service: NewsService;
+  private identity: IdentityService;
 
   constructor(public sandbox: jc.Sandbox) {
-    this.service = sandbox.getService('news');
-    this.results = this.service.getAllNews();
+    this.service = sandbox.getService('service');
+    this.identity = sandbox.getService('identity');
+    this.inbox = this.service.getAllNews();
+  }
+
+  @computed
+  public get user(): User {
+    return this.identity.currentUser;
+  }
+
+  @action
+  public toggleIsOpen() {
+    this.isOpen = !this.isOpen;
   }
 
   public searchNews(term: string) {
-    const results = this.service.searchNews(term);
-    return results;
+    const inbox = this.service.searchNews(term);
+    return inbox;
   }
 
   public getNewsById(id: string) {
