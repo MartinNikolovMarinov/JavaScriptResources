@@ -519,24 +519,19 @@ When does the function end? When it encounters a `return` statement or it encoun
 ## Clojure Scope Chain
 
 ```js
-  function C() {
-    // has access to variable a, b
-    let c = 3;
-  }
-
+function A() {
+  var a = 1;
   function B() {
-    // has access to variable a
-    let b = 2;
-    c();
+    var b = 2;
+    function C() {
+      var c = 3;
+    }
+    C();
   }
+  B();
+}
 
-  function A() {
-    // has access to variable a, b
-    let a = 1;
-    b();
-  }
-
-  A();
+A();
 ```
 <img src="./res/clojure_scope_chain.png" />
 
