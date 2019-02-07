@@ -1354,6 +1354,7 @@ Observable values can be JS primitives, references, plain objects, class instanc
 ### Computed Values on MobX
 
 These values are represented by the `@computed` decorator. Computed values work in hand with observable states. With computed values, you can automatically derive values.
+**All Computed values should be pure. They are not supposed to change state!**
 If you have decorators enabled you can use the @computed decorator on any getter of a class property to declaratively create computed properties :
 ```js
 class OrderLine {
