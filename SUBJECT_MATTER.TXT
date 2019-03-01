@@ -1,0 +1,33 @@
+Day 1 of planing :
+
+Front-End 1 month ?
+    Basic JS Concepts :
+        * learn differences between JavaScript modules, like UMD, CommonJs, etc.
+        * How does this work in JavaScript
+        * what does 'use strict' do
+        * Closures
+        * Promises
+        * The Event Queue
+        *? Web workers -- learn in depth if there is time.
+        * Page load performance
+
+    Basic Networking Concepts :
+        REST, Web Socket, SSE interfaces on the client
+
+    Other tech for FE :
+        * Webpack
+        * Typescript
+        * justcore
+        * Babel
+        unit testing
+        * VS Code
+        immutable.js (optional)
+
+    JS framework basics :
+        React basics
+            * Virtual DOM
+            * Component life-cycles
+            * Props
+            * State
+            * When does react component re-render State management
+            * With Mobx With sucky Redux
