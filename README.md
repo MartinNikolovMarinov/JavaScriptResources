@@ -1332,108 +1332,20 @@ const MyComponent = lazy(() => import("./MyComponent.js"));
 
 A state in this context is the data layer of your application. When it comes to React and the libraries that help it manage state, you can say that state is an object that contains the data that your application is dealing with. State influences how React components behave and how they are rendered.
 
-<h2 id="mobx">Mobx State Management</h2>
+State is the heart of each application and there is no quicker way to create buggy, unmanageable applications than by producing an inconsistent state or state that is out-of-sync with local variables that linger around. Hence many state management solutions try to restrict the ways in which you can modify state, for example by making state immutable. But this introduces new problems; data needs to be normalized, referential integrity can no longer be guaranteed and it becomes next to impossible to use powerful concepts like prototypes.
 
-### Observable State on MobX
-Observable state is one of the main concepts of MobX. The idea behind this concept is to make an object able to emit new changes on them to the observers. You can achieve this with the `@observable` decorator :
-```js
-@observable counter = 0
+## Mobx State Management
 
-// or without decorators :
-decorate(ClassName, {
-  counter: observable
-})
-```
-Observable values can be JS primitives, references, plain objects, class instances, arrays and maps. The following conversion rules are applied, but can be fine-tuned by using modifiers. See below.
+MobX makes state management simple again by addressing the root issue: it makes it impossible to produce an inconsistent state. The strategy to achieve that is simple: Make sure that everything that can be derived from the application state, will be derived. Automatically.
 
-1. If value is an ES6 Map: a new `Observable Map` will be returned.
-2. If value is an array, a new Observable Array will be returned.
-3. If value is an object without prototype, all its current properties will be made observable.
-4. If value is an object with a prototype, a JavaScript primitive or function, observable will throw. Use Boxed Observable observables instead if you want to create a stand-alone observable reference to such a value. MobX will not make objects with a prototype automatically observable; as that is considered the responsibility of its `constructor` function. Use `extendObservable` in the `constructor`, or `@observable` / decorate in its class definition instead.
+<img src="./res/mobx-components.png" /> <br/>
 
-### Computed Values on MobX
+1. First of all, there is the application state. Graphs of objects, arrays, primitives, references that forms the model of your application.
+2. Secondly there are derivations. Basically, any value that can be computed automatically from the state of your application. These derivations, or computed values, can range from simple values, like the number of unfinished todos, to complex stuff like a visual HTML representation of your todos.
+3. Reactions are very similar to derivations. The main difference is these functions don't produce a value. Instead, they run automatically to perform some task. Usually this is I/O related. They make sure that the DOM is updated or that network requests are made automatically at the right time.
+4. Finally there are actions. Actions are all the things that alter the state. MobX will make sure that all changes to the application state caused by your actions are automatically processed by all derivations and reactions. Synchronously and glitch-free.
 
-These values are represented by the `@computed` decorator. Computed values work in hand with observable states. With computed values, you can automatically derive values.
-**All Computed values should be pure. They are not supposed to change state!**
-If you have decorators enabled you can use the @computed decorator on any getter of a class property to declaratively create computed properties :
-```js
-class OrderLine {
-    @observable price = 0;
-    @observable amount = 1;
-
-    constructor(price) {
-        this.price = price;
-    }
-
-    @computed get total() {
-        return this.price * this.amount;
-    }
-}
-```
-
-**The computed function `total` is only calculated when price, or amount have changed.**
-
-### Reactions on MobX
-
-Reactions are very similar to computed values. The difference here is that, instead of computing and returning a value, a reaction simply triggers a side effect, more like it performs a side operation. Reactions occur as a result of changes on observables. Reactions could affect the UI, or they could be background actions. MobX provides three main types of reaction functions: `when`, `autorun`, and `reaction`.
-
-The `when` reaction accepts two functions as parameters, the `predicate` and the `effect`. This reaction runs and observes the first function (the predicate) and, when this one is met, it runs the effect function :
-```js
-when(
-  () => this.isEnabled, // predicate
-  () => this.exit() // effect
-);
-```
-The function that returns `isEnabled` must be a function that reacts. That is, `isEnabled` must be marked with `@computed` so that the value is automatically computed or, better yet, marked with an `@observable` decorator.
-
-The next reaction function is the `autorun` function. This function takes in one function and keeps running it until it is manually disposed. Here you can see how you can use an `autorun` function:
-```js
-@observable age = 10
-const dispose = autorun(() => {
-  console.log("My age is: ", age.get())
-})
-dispose()
-```
-With this in place, anytime the variable age changes, the anonymous function passed to autorun logs it out. This function is disposed once you call dispose.
-
-The next one, the `reaction` function, mandatorily accepts two functions: the data function and side effect function. This function is similar to the autorun function but gives you more control on which observables to track. Here, the data function is tracked and returns data to be used inside effect function. Whereas an autorun function reacts to everything used in its function, the reaction function reacts to observables you specify :
-```js
-const todos = observable([
-  {
-    title: "Read Auth0 Blog",
-    done: false,
-  },
-  {
-    title: "Write MobX article",
-    done: true
-  }
-]);
-
-const reactionSample = reaction(
-  () => todos.map(todo => todo.title),
-  titles => console.log("Reaction: ", titles.join(", "))
-);
-```
-**In this case, the reaction function reacts to changes in the length and title of the list.**
-
-Another reaction function available for React developers is the `observer` function. This one is not provided by the main MobX package but, instead, provided by the `mobx-react` library. To use the observer function, you can simply add the `@observer` decorator in front of it like so:
-```js
-@observer class ClassName {
-  // ...
-}
-```
-**With this reaction function, if an object tagged with the @observable decorator is used in the render method of the component and that property changes, the component is automatically re-rendered. The observer function uses autorun internally.**
-
-### Actions on MobX
-Actions are anything that modifies the state. You can mark your actions using the `@action` decorator. As such, you are supposed to use the `@action` on any function that modifies observables or has side effects. A simple example is this:
-```js
-@observable variable = 0;
-
-@action setVariable(newVariable){
-  this.variable = newVariable;
-}
-```
-This function is updating the value of an `observable`, and so it is marked with `@action`.
+## [In Depth Information for Mobx](mobx.md)
 
 ### Store
 
@@ -1562,6 +1474,10 @@ Visually :
 [React documentation](https://reactjs.org/docs/getting-started.html)
 
 [Mobx and React state management](https://auth0.com/blog/managing-the-state-of-react-apps-with-mobx/)
+
+[Mobx quick start](https://mobx.js.org/getting-started.html)
+
+[ES6 Proxies In Depth](https://ponyfoo.com/articles/es6-proxies-in-depth)
 
 [Testing Applications](https://codeahoy.com/2016/07/05/unit-integration-and-end-to-end-tests-finding-the-right-balance/)
 
