@@ -551,26 +551,29 @@ So what ?
 
 ### We must clear big objects that aren't used in the future
 ```js
-(function() {
-  const bigData = [...]
-  const smallResult = []
-
-  function manipulateBigDate() {
-    smallResult = work(bigData);
-  }
-
-  manipulateBigDate();
-
-  bigData = null // !! If we forget this line bigDate will remain in memory as a leak !!
-
-  function getResult() {
-    return smallResult;
+const BigDataManipulator = (function(data) {
+  function manipulateBigData() {
+    // The data argument points to the large 5 MB blob of data,
+    // It can't be Garbage Collected because it is still reachable
+    // by calling manipulateBigData from the outside !
+    work(data)
   }
 
   return {
-    getResult
+    manipulateBigData
   }
 })()
+
+const bigData = [...] // 5 MB of data here
+const m = new BigDataManipulator(bigData)
+
+// Even if we set bigData to null,
+// argument data is used in the manipulateBigData's Clojure,
+// which creates a memory leak
+bigData = null
+
+// Until we do this :
+m = null
 ```
 
 <h1 id="promises">Promises</h1>
