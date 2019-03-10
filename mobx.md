@@ -4,7 +4,7 @@
 
 ## Observable State
 
-Observable state is one of the main concepts of MobX. The idea behind this concept is to make an object able to emit changes to itself to listening observers. In the lateset Mobx versions this is acehived by using `ES6 Proxies`. You can use a `Proxy` to **determine behavior** whenever the properties of a target object are accessed. A handler object can be used to configure traps for your `Proxy`, more information on proxies [here](https://ponyfoo.com/articles/es6-proxies-in-depth).
+Observable state is one of the main concepts of MobX. The idea behind this concept is to make an object able to emit changes to itself, to listening observers. In the lateset Mobx versions this is acehived by using `ES6 Proxies`. You can use a `Proxy` to **determine behavior** whenever the properties of a target object are accessed. A handler object can be used to configure traps for your `Proxy`, more information on proxies [here](https://ponyfoo.com/articles/es6-proxies-in-depth).
 
 You can make something observable by using the `@observable` decorator :
 ```js
@@ -15,8 +15,8 @@ Observable values can be JS primitives, references, plain objects, class instanc
 
 1. If value is an ES6 Map: a `new Observable Map` will be returned.
 2. If value is an array, a `new Observable Array` will be returned.
-3. If value is an object without prototype, all its current properties will be made observable.
-4. If value is an object with a prototype, a JavaScript primitive or function, observable will throw. Use Boxed Observable observables instead if you want to create a stand-alone observable reference to such a value. MobX will not make objects with a prototype automatically observable; as that is considered the responsibility of its `constructor` function. Use `extendObservable` in the `constructor`, or `@observable` / decorate in its class definition instead.
+3. If value is an object without `prototype`, all its current properties will be made observable.
+4. If value is an object with a `prototype`, a JavaScript primitive or function, observable will throw. Use Boxed Observable observables instead if you want to create a stand-alone observable reference to such a value. MobX will not make objects with a `prototype` automatically observable; as that is considered the responsibility of its `constructor` function. Use `extendObservable` in the `constructor`, or `@observable` / decorate in its class definition instead.
 
 ## Computed Values on MobX
 
@@ -114,4 +114,54 @@ This function is updating the value of an `observable`, and so it is marked with
 
 ## What does Mobx React to ?
 
-[Need to know from Official Documentation](https://mobx.js.org/best/react.html)
+[Need to know from Official Documentation (READ FIRST!)](https://mobx.js.org/best/react.html)
+
+MobX Reaction Rules:
+
+* Always dereference (read) observables during the execution of the tracking-function. Dereferencing is the key to establishing the MobX tracker.
+
+* Tracking only happens in the synchronously executing code of the tracking-function.
+
+* Only observables that already exist will be tracked.
+
+* One exception to the previous rule is for observable maps where a dynamic key is also tracked.
+
+* MobX 5 can track not-yet-existing properties for all objects created using the observable() API.
+
+Different Types of observables, :
+
+* The `@observable` is shorthand for `@observable.deep` where deep observation stops at objects with a `constructor` or `prototype` (as they're expected to then have their own observable properties)
+
+* `@observable.shallow` is most useful for arrays and maps where only the length/size, additions, and removals are of side-effect interest
+
+* `@observable.ref` is useful if only the value assigned (and not data in the structure itself) is of side-effect interest
+
+* `@observable.struct` tracks property values vs property reference to validate side-effect execution
+{ x: 0, y: 0 } and { x: 0, y: 0 } are two distinct objects, but they're structurally the same
+
+* The `extendObservable()` API allows runtime property and function additions to preexisting observables. It is required when trying to dynamically add `@action` or `@computed`, because observable Maps can only add/remove properties.
+
+[In Depth Explanation of reactions in Mobx](https://hackernoon.com/becoming-fully-reactive-an-in-depth-explanation-of-mobservable-55995262a254)
+
+## MobX Internals
+
+MobX is architected in three layers (each built upon the previous):
+
+* **Atoms** -
+  * atomic unit of the observable dependency tree.
+  * keeps track of its observers but not the value itself.
+
+* **ObservableValue, ComputedValue, and Derivations** -
+  * `ObservableValue` extends `Atom` and provides value storage (and core implementation of boxed `Observables`).
+  * `Derivations` and `Reactions` are the observers of `Atoms`. They respond to `Atom` changes and schedule reactions.
+  * `ComputedValue` builds on the derivations and acts as an `Observable`.
+
+* **Observable{Object, Array, Map} and APIs** -
+  * Built on top of `ObservableValue` and represent properties and values
+  * API layer of MobX
+
+`Observable` vs `Observer`
+
+* `ObservableValue` = `Observable` only
+* `Reaction` = `Observer` only
+* `ComputedValue` = Both `Observable` and `Observer`
